@@ -1,2 +1,3 @@
-<h1>To-Do App</h1>
-<p>This is my first Android App made using Kotlin.</p>
+# To-Do App
+## My first Android app made with Kotlin. To be honest, I took a lot of AI help in this app :) Just to see how things work.
+### Next time, I will definitely develop apps on my own.

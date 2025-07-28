@@ -1,5 +1,6 @@
 package com.masum.todo.ui.theme
 
+import android.R.attr.fontFamily
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -14,7 +15,7 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
-    )
+    ),
 
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,

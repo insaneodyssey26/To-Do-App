@@ -1,6 +1,7 @@
 package com.masum.todo.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -26,7 +27,7 @@ fun TodoList(
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 8.dp)
+        contentPadding = PaddingValues(vertical = 16.dp, horizontal = 4.dp)
     ) {
         items(
             items = tasks,
@@ -34,8 +35,10 @@ fun TodoList(
         ) { task ->
             AnimatedVisibility(
                 visible = true,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
+                enter = fadeIn(animationSpec = tween(300)) + 
+                        expandVertically(animationSpec = tween(300)),
+                exit = fadeOut(animationSpec = tween(200)) + 
+                       shrinkVertically(animationSpec = tween(200))
             ) {
                 TodoItemCard(
                     task = task,

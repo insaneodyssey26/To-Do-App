@@ -42,6 +42,9 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 # Coroutines
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 
+# Core
+androidx-core = { group = "androidx.core", name = "core", version.ref = "coreKtx" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

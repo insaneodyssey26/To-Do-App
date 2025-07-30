@@ -46,7 +46,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.masum.todo.presentation.components.EmptyState
 import com.masum.todo.presentation.components.TaskDialog
+import com.masum.todo.presentation.components.TodoGrid
 import com.masum.todo.presentation.components.TodoList
+import com.masum.todo.presentation.components.ViewToggleButton
 import com.masum.todo.presentation.viewmodel.TodoUiEvent
 import com.masum.todo.presentation.viewmodel.TodoViewModel
 
@@ -90,6 +92,14 @@ fun TodoScreen(
                             )
                         }
                     }
+                },
+                actions = {
+                    ViewToggleButton(
+                        isGridView = uiState.isGridView,
+                        onToggleView = {
+                            viewModel.onEvent(TodoUiEvent.ToggleViewMode)
+                        }
+                    )
                 },
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -157,18 +167,33 @@ fun TodoScreen(
                         EmptyState()
                     }
                     else -> {
-                        TodoList(
-                            tasks = uiState.tasks,
-                            onTaskChecked = { task, isChecked ->
-                                viewModel.onEvent(TodoUiEvent.ToggleTaskCompletion(task, isChecked))
-                            },
-                            onDeleteTask = { task ->
-                                viewModel.onEvent(TodoUiEvent.DeleteTask(task))
-                            },
-                            onEditTask = { task ->
-                                viewModel.onEvent(TodoUiEvent.ShowEditDialog(task))
-                            }
-                        )
+                        if (uiState.isGridView) {
+                            TodoGrid(
+                                tasks = uiState.tasks,
+                                onTaskChecked = { task, isChecked ->
+                                    viewModel.onEvent(TodoUiEvent.ToggleTaskCompletion(task, isChecked))
+                                },
+                                onDeleteTask = { task ->
+                                    viewModel.onEvent(TodoUiEvent.DeleteTask(task))
+                                },
+                                onEditTask = { task ->
+                                    viewModel.onEvent(TodoUiEvent.ShowEditDialog(task))
+                                }
+                            )
+                        } else {
+                            TodoList(
+                                tasks = uiState.tasks,
+                                onTaskChecked = { task, isChecked ->
+                                    viewModel.onEvent(TodoUiEvent.ToggleTaskCompletion(task, isChecked))
+                                },
+                                onDeleteTask = { task ->
+                                    viewModel.onEvent(TodoUiEvent.DeleteTask(task))
+                                },
+                                onEditTask = { task ->
+                                    viewModel.onEvent(TodoUiEvent.ShowEditDialog(task))
+                                }
+                            )
+                        }
                     }
                 }
             }

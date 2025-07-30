@@ -11,7 +11,8 @@ data class TodoUiState(
     val currentTaskHeading: String = "",
     val currentTaskBody: String = "",
     val taskToEdit: TodoTask? = null,
-    val snackbarMessage: String? = null
+    val snackbarMessage: String? = null,
+    val isGridView: Boolean = true
 )
 
 sealed class TodoUiEvent {
@@ -28,4 +29,5 @@ sealed class TodoUiEvent {
     data class UpdateCurrentTaskBody(val body: String) : TodoUiEvent()
     data object ClearSnackbarMessage : TodoUiEvent()
     data class ShowError(val message: String) : TodoUiEvent()
+    data object ToggleViewMode : TodoUiEvent()
 }

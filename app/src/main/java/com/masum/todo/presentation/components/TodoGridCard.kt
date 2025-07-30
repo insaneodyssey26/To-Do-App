@@ -27,6 +27,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -60,23 +62,39 @@ fun TodoGridCard(
                     else 
                         MaterialTheme.colorScheme.surface
                 }
-                task.isCompleted -> task.color.color.copy(alpha = 0.3f)
-                else -> task.color.color.copy(alpha = 0.7f)
+                task.isCompleted -> task.color.color.copy(alpha = 0.2f)
+                else -> task.color.color.copy(alpha = 0.8f)
             }
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (task.isCompleted) 2.dp else 4.dp
+            defaultElevation = if (task.isCompleted) 2.dp else 8.dp
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(16.dp)
     ) {
         Box {
+            if (task.color != TaskColor.TRANSPARENT && !task.isCompleted) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    task.color.color.copy(alpha = 0.6f),
+                                    task.color.color.copy(alpha = 0.3f)
+                                )
+                            )
+                        )
+                )
+            }
+            
             if (task.isCompleted) {
                 Box(
                     modifier = Modifier
                         .matchParentSize()
                         .background(
                             CompletedTaskOverlay,
-                            RoundedCornerShape(12.dp)
+                            RoundedCornerShape(16.dp)
                         )
                 )
             }
@@ -84,7 +102,7 @@ fun TodoGridCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(20.dp)
                     .alpha(if (task.isCompleted) 0.7f else 1f)
             ) {
                 Row(

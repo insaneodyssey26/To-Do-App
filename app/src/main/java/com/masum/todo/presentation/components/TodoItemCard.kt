@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -72,23 +73,39 @@ fun TodoItemCard(
                     else 
                         MaterialTheme.colorScheme.surface
                 }
-                task.isCompleted -> task.color.color.copy(alpha = 0.3f)
-                else -> task.color.color.copy(alpha = 0.7f)
+                task.isCompleted -> task.color.color.copy(alpha = 0.2f)
+                else -> task.color.color.copy(alpha = 0.8f)
             }
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (task.isCompleted) 2.dp else 6.dp
+            defaultElevation = if (task.isCompleted) 2.dp else 8.dp
         ),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Box {
+            if (task.color != TaskColor.TRANSPARENT && !task.isCompleted) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    task.color.color.copy(alpha = 0.6f),
+                                    task.color.color.copy(alpha = 0.3f)
+                                )
+                            )
+                        )
+                )
+            }
+            
             if (task.isCompleted) {
                 Box(
                     modifier = Modifier
                         .matchParentSize()
                         .background(
                             CompletedTaskOverlay,
-                            RoundedCornerShape(16.dp)
+                            RoundedCornerShape(20.dp)
                         )
                 )
             }

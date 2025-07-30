@@ -71,19 +71,31 @@ fun TodoScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-    LaunchedEffect(uiState.snackbarMessage, uiState.showUndoSnackbar) {
-        if (uiState.showUndoSnackbar == true && uiState.recentlyDeletedTask != null) {
-            val result = snackbarHostState.showSnackbar(
-                message = "Task deleted: ${uiState.recentlyDeletedTask!!.heading}",
-                actionLabel = "Undo"
-            )
-            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
-                viewModel.undoDeleteTask()
-            } else {
+    LaunchedEffect(uiState.showUndoSnackbar) {
+        if (uiState.showUndoSnackbar) {
+            kotlinx.coroutines.delay(10000)
+            if (uiState.showUndoSnackbar) {
                 viewModel.onEvent(TodoUiEvent.ClearSnackbarMessage)
             }
-        } else if (uiState.snackbarMessage != null) {
-            snackbarHostState.showSnackbar(uiState.snackbarMessage!!)
+        }
+    }
+
+    LaunchedEffect(uiState.showUndoSnackbar, uiState.recentlyDeletedTask?.id) {
+        if (uiState.showUndoSnackbar && uiState.recentlyDeletedTask != null) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Task deleted: ${uiState.recentlyDeletedTask!!.heading}",
+                actionLabel = "Undo",
+                duration = androidx.compose.material3.SnackbarDuration.Long
+            )
+            viewModel.onEvent(TodoUiEvent.ClearSnackbarMessage)
+            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                viewModel.undoDeleteTask()
+            }
+        }
+    }
+    LaunchedEffect(uiState.snackbarMessage) {
+        uiState.snackbarMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
             viewModel.onEvent(TodoUiEvent.ClearSnackbarMessage)
         }
     }
@@ -127,7 +139,6 @@ fun TodoScreen(
                                        else MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        
                         IconButton(
                             onClick = {
                                 viewModel.onEvent(TodoUiEvent.ToggleFilterOptions)
@@ -140,7 +151,6 @@ fun TodoScreen(
                                        else MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        
                         ViewToggleButton(
                             isGridView = uiState.isGridView,
                             onToggleView = {
@@ -177,7 +187,6 @@ fun TodoScreen(
                 animationSpec = tween(300),
                 label = "fab_scale"
             )
-            
             ExtendedFloatingActionButton(
                 onClick = {
                     viewModel.onEvent(TodoUiEvent.ShowTaskEditor)
@@ -242,7 +251,6 @@ fun TodoScreen(
                         viewModel.onEvent(TodoUiEvent.ClearSearch)
                     }
                 )
-                
                 if (uiState.tasks.isNotEmpty()) {
                     TaskSummaryCard(
                         totalTasks = uiState.tasks.size,
@@ -251,7 +259,6 @@ fun TodoScreen(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
-                
                 when {
                     uiState.isLoading -> {
                         Box(
@@ -303,7 +310,6 @@ fun TodoScreen(
             }
         }
     }
-
     if (uiState.showAddDialog) {
         TaskDialog(
             dialogTitle = "Add New Task",
@@ -328,7 +334,6 @@ fun TodoScreen(
             confirmButtonText = "Add"
         )
     }
-
     if (uiState.showEditDialog && uiState.taskToEdit != null) {
         TaskDialog(
             dialogTitle = "Edit Task",
@@ -355,8 +360,6 @@ fun TodoScreen(
             confirmButtonText = "Save"
         )
     }
-
-
     if (uiState.showTaskEditor) {
         val taskToEdit = uiState.taskToEdit
         TaskEditorScreen(
@@ -455,14 +458,12 @@ private fun TaskSummaryCard(
                 count = totalTasks,
                 color = MaterialTheme.colorScheme.primary
             )
-            
             TaskStatItem(
                 icon = Icons.Default.CheckCircle,
                 label = "Completed",
                 count = completedTasks,
                 color = Color(0xFF4CAF50)
             )
-            
             if (filteredCount != null) {
                 TaskStatItem(
                     icon = Icons.Default.FilterList,

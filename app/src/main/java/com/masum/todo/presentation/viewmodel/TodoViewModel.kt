@@ -117,27 +117,17 @@ class TodoViewModel(
     }
     
     private fun updateTask(task: TodoTask) {
-        val heading = _uiState.value.currentTaskHeading
-        val body = _uiState.value.currentTaskBody
-        val color = _uiState.value.currentTaskColor
-        
-        if (heading.isBlank()) {
+        if (task.heading.isBlank()) {
             showError("Task heading cannot be empty")
             return
         }
         
         viewModelScope.launch {
             try {
-                val updatedTask = task.copy(
-                    heading = heading.trim(),
-                    body = body.trim(),
-                    color = color
-                )
-                repository.updateTask(updatedTask)
-                hideEditDialog()
-                clearCurrentTask()
-                showSnackbarMessage("Task updated: ${updatedTask.heading}")
-                ErrorHandler.logError("Task updated successfully: ${updatedTask.heading}")
+                repository.updateTask(task)
+                hideTaskEditor()
+                showSnackbarMessage("Task updated: ${task.heading}")
+                ErrorHandler.logError("Task updated successfully: ${task.heading}")
             } catch (e: Exception) {
                 ErrorHandler.logError("Failed to update task", e)
                 showError("Failed to update task: ${ErrorHandler.getErrorMessage(e)}")

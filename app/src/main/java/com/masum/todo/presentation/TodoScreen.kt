@@ -335,14 +335,16 @@ fun TodoScreen(
 
     
     if (uiState.showTaskEditor) {
+        val taskToEdit = uiState.taskToEdit
         TaskEditorScreen(
-            taskId = uiState.taskToEdit?.id,
+            taskId = taskToEdit?.id,
+            existingTask = taskToEdit,
             onNavigateBack = {
                 viewModel.onEvent(TodoUiEvent.HideTaskEditor)
             },
             onSaveTask = { heading, body, color, priority, dueDate, subtasks, tags ->
-                viewModel.onEvent(
-                    TodoUiEvent.AddAdvancedTask(
+                if (taskToEdit != null) {
+                    val updatedTask = taskToEdit.copy(
                         heading = heading,
                         body = body,
                         color = color,
@@ -351,7 +353,20 @@ fun TodoScreen(
                         subtasks = subtasks,
                         tags = tags
                     )
-                )
+                    viewModel.onEvent(TodoUiEvent.UpdateTask(updatedTask))
+                } else {
+                    viewModel.onEvent(
+                        TodoUiEvent.AddAdvancedTask(
+                            heading = heading,
+                            body = body,
+                            color = color,
+                            priority = priority,
+                            dueDate = dueDate,
+                            subtasks = subtasks,
+                            tags = tags
+                        )
+                    )
+                }
             }
         )
     }

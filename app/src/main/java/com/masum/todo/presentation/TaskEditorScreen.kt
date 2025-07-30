@@ -104,6 +104,7 @@ import java.util.UUID
 @Composable
 fun TaskEditorScreen(
     taskId: Int? = null,
+    existingTask: com.masum.todo.domain.model.TodoTask? = null,
     onNavigateBack: () -> Unit,
     onSaveTask: (
         heading: String,
@@ -116,13 +117,13 @@ fun TaskEditorScreen(
     ) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var taskHeading by remember { mutableStateOf("") }
-    var taskBodyField by remember { mutableStateOf(TextFieldValue("")) }
-    var selectedColor by remember { mutableStateOf(TaskColor.DEFAULT) }
-    var selectedPriority by remember { mutableStateOf(TaskPriority.MEDIUM) }
-    var dueDate by remember { mutableStateOf<Date?>(null) }
-    var subtasks by remember { mutableStateOf(listOf<Subtask>()) }
-    var tags by remember { mutableStateOf(listOf<String>()) }
+    var taskHeading by remember { mutableStateOf(existingTask?.heading ?: "") }
+    var taskBodyField by remember { mutableStateOf(TextFieldValue(existingTask?.body ?: "")) }
+    var selectedColor by remember { mutableStateOf(existingTask?.color ?: TaskColor.DEFAULT) }
+    var selectedPriority by remember { mutableStateOf(existingTask?.priority ?: TaskPriority.MEDIUM) }
+    var dueDate by remember { mutableStateOf(existingTask?.dueDate) }
+    var subtasks by remember { mutableStateOf(existingTask?.subtasks ?: listOf<Subtask>()) }
+    var tags by remember { mutableStateOf(existingTask?.tags ?: listOf<String>()) }
     var newSubtaskText by remember { mutableStateOf("") }
     var newTagText by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }

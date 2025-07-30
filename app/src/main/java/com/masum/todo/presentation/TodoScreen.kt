@@ -205,11 +205,15 @@ fun TodoScreen(
             dialogTitle = "Add New Task",
             taskHeading = uiState.currentTaskHeading,
             taskBody = uiState.currentTaskBody,
+            taskColor = uiState.currentTaskColor,
             onHeadingChange = { heading ->
                 viewModel.onEvent(TodoUiEvent.UpdateCurrentTaskHeading(heading))
             },
             onBodyChange = { body ->
                 viewModel.onEvent(TodoUiEvent.UpdateCurrentTaskBody(body))
+            },
+            onColorChange = { color ->
+                viewModel.onEvent(TodoUiEvent.UpdateCurrentTaskColor(color))
             },
             onDismiss = {
                 viewModel.onEvent(TodoUiEvent.HideAddDialog)
@@ -226,11 +230,15 @@ fun TodoScreen(
             dialogTitle = "Edit Task",
             taskHeading = uiState.currentTaskHeading,
             taskBody = uiState.currentTaskBody,
+            taskColor = uiState.currentTaskColor,
             onHeadingChange = { heading ->
                 viewModel.onEvent(TodoUiEvent.UpdateCurrentTaskHeading(heading))
             },
             onBodyChange = { body ->
                 viewModel.onEvent(TodoUiEvent.UpdateCurrentTaskBody(body))
+            },
+            onColorChange = { color ->
+                viewModel.onEvent(TodoUiEvent.UpdateCurrentTaskColor(color))
             },
             onDismiss = {
                 viewModel.onEvent(TodoUiEvent.HideEditDialog)

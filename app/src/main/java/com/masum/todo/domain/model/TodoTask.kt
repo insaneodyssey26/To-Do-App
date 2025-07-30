@@ -8,5 +8,6 @@ data class TodoTask(
     val body: String = "",
     val isCompleted: Boolean = false,
     val createdAt: Date = Date(),
-    val updatedAt: Date = Date()
+    val updatedAt: Date = Date(),
+    val color: TaskColor = TaskColor.DEFAULT
 )

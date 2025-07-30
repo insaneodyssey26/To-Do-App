@@ -65,9 +65,9 @@ fun TodoItemCard(
             .padding(horizontal = 16.dp, vertical = 4.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (task.isCompleted) 
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-            else 
-                MaterialTheme.colorScheme.surface
+                task.color.color.copy(alpha = 0.3f)
+            else
+                task.color.color.copy(alpha = 0.7f)
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (task.isCompleted) 2.dp else 6.dp

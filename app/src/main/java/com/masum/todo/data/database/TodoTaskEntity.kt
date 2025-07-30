@@ -4,11 +4,12 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import com.masum.todo.domain.model.TaskColor
 import com.masum.todo.domain.model.TodoTask
 import java.util.Date
 
 @Entity(tableName = "todo_tasks")
-@TypeConverters(DateConverter::class)
+@TypeConverters(DateConverter::class, TaskColorConverter::class)
 data class TodoTaskEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
@@ -16,7 +17,8 @@ data class TodoTaskEntity(
     val body: String = "",
     val isCompleted: Boolean = false,
     val createdAt: Date = Date(),
-    val updatedAt: Date = Date()
+    val updatedAt: Date = Date(),
+    val color: TaskColor = TaskColor.DEFAULT
 )
 
 
@@ -27,7 +29,8 @@ fun TodoTaskEntity.toDomainModel(): TodoTask {
         body = body,
         isCompleted = isCompleted,
         createdAt = createdAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+        color = color
     )
 }
 
@@ -38,7 +41,8 @@ fun TodoTask.toEntity(): TodoTaskEntity {
         body = body,
         isCompleted = isCompleted,
         createdAt = createdAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+        color = color
     )
 }
 
@@ -51,5 +55,17 @@ class DateConverter {
     @TypeConverter
     fun dateToTimestamp(date: Date?): Long? {
         return date?.time
+    }
+}
+
+class TaskColorConverter {
+    @TypeConverter
+    fun fromTaskColor(color: TaskColor): Int {
+        return color.ordinal
+    }
+
+    @TypeConverter
+    fun toTaskColor(ordinal: Int): TaskColor {
+        return TaskColor.fromOrdinal(ordinal)
     }
 }

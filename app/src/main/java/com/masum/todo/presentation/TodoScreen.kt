@@ -342,7 +342,7 @@ fun TodoScreen(
             onNavigateBack = {
                 viewModel.onEvent(TodoUiEvent.HideTaskEditor)
             },
-            onSaveTask = { heading, body, color, priority, dueDate, subtasks, tags ->
+            onSaveTask = { heading, body, color, priority, dueDate, tags ->
                 if (taskToEdit != null) {
                     val updatedTask = taskToEdit.copy(
                         heading = heading,
@@ -350,7 +350,6 @@ fun TodoScreen(
                         color = color,
                         priority = priority,
                         dueDate = dueDate,
-                        subtasks = subtasks,
                         tags = tags
                     )
                     viewModel.onEvent(TodoUiEvent.UpdateTask(updatedTask))
@@ -362,7 +361,6 @@ fun TodoScreen(
                             color = color,
                             priority = priority,
                             dueDate = dueDate,
-                            subtasks = subtasks,
                             tags = tags
                         )
                     )

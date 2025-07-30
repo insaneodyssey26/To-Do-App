@@ -3,7 +3,6 @@ package com.masum.todo.presentation.viewmodel
 import com.masum.todo.domain.model.TaskColor
 import com.masum.todo.domain.model.TaskPriority
 import com.masum.todo.domain.model.TodoTask
-import com.masum.todo.domain.model.Subtask
 import java.util.Date
 
 enum class FilterType {
@@ -45,7 +44,8 @@ data class TodoUiState(
     val selectedFilter: FilterType = FilterType.ALL,
     val selectedSort: SortType = SortType.CREATED_DATE,
     val showSearchBar: Boolean = false,
-    val showFilterOptions: Boolean = false
+    val showFilterOptions: Boolean = false,
+    val taskEditorDraft: com.masum.todo.domain.model.TodoTask? = null
 )
 
 sealed class TodoUiEvent {
@@ -57,7 +57,6 @@ sealed class TodoUiEvent {
         val color: TaskColor,
         val priority: TaskPriority,
         val dueDate: Date?,
-        val subtasks: List<Subtask>,
         val tags: List<String>
     ) : TodoUiEvent()
     data class UpdateTask(val task: TodoTask) : TodoUiEvent()
@@ -82,4 +81,9 @@ sealed class TodoUiEvent {
     data object ToggleSearchBar : TodoUiEvent()
     data object ToggleFilterOptions : TodoUiEvent()
     data object ClearSearch : TodoUiEvent()
+
+    // Task Editor Draft events
+    data class SaveTaskEditorDraft(val draft: com.masum.todo.domain.model.TodoTask) : TodoUiEvent()
+    data object ClearTaskEditorDraft : TodoUiEvent()
+    data class UpdateDraftTags(val tags: List<String>) : TodoUiEvent()
 }

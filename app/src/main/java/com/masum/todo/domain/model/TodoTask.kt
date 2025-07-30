@@ -14,7 +14,6 @@ data class TodoTask(
     val attachments: List<TaskAttachment> = emptyList(),
     val priority: TaskPriority = TaskPriority.MEDIUM,
     val dueDate: Date? = null,
-    val subtasks: List<Subtask> = emptyList(),
     val tags: List<String> = emptyList()
 )
 
@@ -24,13 +23,6 @@ data class TaskAttachment(
     val filePath: String,
     val fileType: AttachmentType,
     val fileSize: Long,
-    val createdAt: Date = Date()
-)
-
-data class Subtask(
-    val id: String,
-    val title: String,
-    val isCompleted: Boolean = false,
     val createdAt: Date = Date()
 )
 

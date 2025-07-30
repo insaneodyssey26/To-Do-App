@@ -71,9 +71,19 @@ fun TodoScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-    LaunchedEffect(uiState.snackbarMessage) {
-        uiState.snackbarMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
+    LaunchedEffect(uiState.snackbarMessage, uiState.showUndoSnackbar) {
+        if (uiState.showUndoSnackbar == true && uiState.recentlyDeletedTask != null) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Task deleted: ${uiState.recentlyDeletedTask!!.heading}",
+                actionLabel = "Undo"
+            )
+            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                viewModel.undoDeleteTask()
+            } else {
+                viewModel.onEvent(TodoUiEvent.ClearSnackbarMessage)
+            }
+        } else if (uiState.snackbarMessage != null) {
+            snackbarHostState.showSnackbar(uiState.snackbarMessage!!)
             viewModel.onEvent(TodoUiEvent.ClearSnackbarMessage)
         }
     }
@@ -333,7 +343,7 @@ fun TodoScreen(
         )
     }
 
-    
+
     if (uiState.showTaskEditor) {
         val taskToEdit = uiState.taskToEdit
         TaskEditorScreen(

@@ -93,7 +93,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.masum.todo.domain.model.TaskColor
 import com.masum.todo.domain.model.TaskPriority
-import com.masum.todo.domain.model.Subtask
 import com.masum.todo.presentation.components.ColorPicker
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -112,7 +111,6 @@ fun TaskEditorScreen(
         color: TaskColor,
         priority: TaskPriority,
         dueDate: Date?,
-        subtasks: List<Subtask>,
         tags: List<String>
     ) -> Unit,
     modifier: Modifier = Modifier
@@ -122,9 +120,7 @@ fun TaskEditorScreen(
     var selectedColor by remember { mutableStateOf(existingTask?.color ?: TaskColor.DEFAULT) }
     var selectedPriority by remember { mutableStateOf(existingTask?.priority ?: TaskPriority.MEDIUM) }
     var dueDate by remember { mutableStateOf(existingTask?.dueDate) }
-    var subtasks by remember { mutableStateOf(existingTask?.subtasks ?: listOf<Subtask>()) }
     var tags by remember { mutableStateOf(existingTask?.tags ?: listOf<String>()) }
-    var newSubtaskText by remember { mutableStateOf("") }
     var newTagText by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
@@ -250,7 +246,6 @@ fun TaskEditorScreen(
                             selectedColor,
                             selectedPriority,
                             dueDate,
-                            subtasks,
                             tags
                         )
                         onNavigateBack()
@@ -492,33 +487,6 @@ fun TaskEditorScreen(
             }
 
             
-            SubtasksSection(
-                subtasks = subtasks,
-                newSubtaskText = newSubtaskText,
-                onNewSubtaskTextChange = { newSubtaskText = it },
-                onAddSubtask = {
-                    if (newSubtaskText.isNotBlank()) {
-                        subtasks = subtasks + Subtask(
-                            id = UUID.randomUUID().toString(),
-                            title = newSubtaskText
-                        )
-                        newSubtaskText = ""
-                    }
-                },
-                onToggleSubtask = { subtaskId ->
-                    subtasks = subtasks.map { subtask ->
-                        if (subtask.id == subtaskId) {
-                            subtask.copy(isCompleted = !subtask.isCompleted)
-                        } else subtask
-                    }
-                },
-                onDeleteSubtask = { subtaskId ->
-                    subtasks = subtasks.filter { it.id != subtaskId }
-                }
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
             
             TagsSection(
                 tags = tags,
@@ -676,135 +644,6 @@ private fun PrioritySelector(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun SubtasksSection(
-    subtasks: List<Subtask>,
-    newSubtaskText: String,
-    onNewSubtaskTextChange: (String) -> Unit,
-    onAddSubtask: () -> Unit,
-    onToggleSubtask: (String) -> Unit,
-    onDeleteSubtask: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Subtasks",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "${subtasks.count { it.isCompleted }}/${subtasks.size}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = newSubtaskText,
-                    onValueChange = onNewSubtaskTextChange,
-                    placeholder = { Text("Add subtask...") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { onAddSubtask() }),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                FloatingActionButton(
-                    onClick = onAddSubtask,
-                    modifier = Modifier.size(40.dp),
-                    containerColor = MaterialTheme.colorScheme.primary
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Subtask",
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-            
-            if (subtasks.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                subtasks.forEach { subtask ->
-                    SubtaskItem(
-                        subtask = subtask,
-                        onToggle = { onToggleSubtask(subtask.id) },
-                        onDelete = { onDeleteSubtask(subtask.id) }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SubtaskItem(
-    subtask: Subtask,
-    onToggle: () -> Unit,
-    onDelete: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                RoundedCornerShape(8.dp)
-            )
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(
-            checked = subtask.isCompleted,
-            onCheckedChange = { onToggle() }
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = subtask.title,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f),
-            color = if (subtask.isCompleted) 
-                MaterialTheme.colorScheme.onSurfaceVariant 
-            else 
-                MaterialTheme.colorScheme.onSurface
-        )
-        IconButton(
-            onClick = onDelete,
-            modifier = Modifier.size(32.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete Subtask",
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(16.dp)
-            )
         }
     }
 }

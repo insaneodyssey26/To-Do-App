@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.masum.todo.domain.model.TaskColor
 import com.masum.todo.domain.model.TaskPriority
 import com.masum.todo.domain.model.TodoTask
-import com.masum.todo.domain.model.Subtask
 import com.masum.todo.domain.repository.TodoRepository
 import com.masum.todo.utils.ErrorHandler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +32,7 @@ class TodoViewModel(
             is TodoUiEvent.AddTask -> addTask(event.heading, event.body)
             is TodoUiEvent.AddAdvancedTask -> addAdvancedTask(
                 event.heading, event.body, event.color, event.priority,
-                event.dueDate, event.subtasks, event.tags
+                event.dueDate, event.tags
             )
             is TodoUiEvent.UpdateTask -> updateTask(event.task)
             is TodoUiEvent.DeleteTask -> deleteTask(event.task)
@@ -57,9 +56,31 @@ class TodoViewModel(
             is TodoUiEvent.ToggleSearchBar -> toggleSearchBar()
             is TodoUiEvent.ToggleFilterOptions -> toggleFilterOptions()
             is TodoUiEvent.ClearSearch -> clearSearch()
+            else -> {}
+        }
+        when (event) {
+            is TodoUiEvent.SaveTaskEditorDraft -> saveTaskEditorDraft(event.draft)
+            is TodoUiEvent.ClearTaskEditorDraft -> clearTaskEditorDraft()
+            is TodoUiEvent.UpdateDraftTags -> updateDraftTags(event.tags)
+            else -> {}
         }
     }
-    
+
+    private fun saveTaskEditorDraft(draft: TodoTask) {
+        _uiState.value = _uiState.value.copy(taskEditorDraft = draft)
+    }
+
+    private fun clearTaskEditorDraft() {
+        _uiState.value = _uiState.value.copy(taskEditorDraft = null)
+    }
+
+    private fun updateDraftTags(tags: List<String>) {
+        val draft = _uiState.value.taskEditorDraft
+        if (draft != null) {
+            _uiState.value = _uiState.value.copy(taskEditorDraft = draft.copy(tags = tags))
+        }
+    }
+
     private fun loadTasks() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
@@ -169,7 +190,6 @@ class TodoViewModel(
         color: TaskColor,
         priority: TaskPriority,
         dueDate: Date?,
-        subtasks: List<Subtask>,
         tags: List<String>
     ) {
         if (heading.isBlank()) {
@@ -185,7 +205,6 @@ class TodoViewModel(
                     color = color,
                     priority = priority,
                     dueDate = dueDate,
-                    subtasks = subtasks,
                     tags = tags
                 )
                 repository.insertTask(newTask)
@@ -344,8 +363,7 @@ class TodoViewModel(
             filteredTasks = filteredTasks.filter { task ->
                 task.heading.lowercase().contains(searchQuery) ||
                 task.body.lowercase().contains(searchQuery) ||
-                task.tags.any { it.lowercase().contains(searchQuery) } ||
-                task.subtasks.any { it.title.lowercase().contains(searchQuery) }
+                task.tags.any { it.lowercase().contains(searchQuery) }
             }
         }
         

@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 enum class TaskColor(val color: Color, val displayName: String) {
     DEFAULT(Color(0xFFFFFBFE), "Default"),
+    TRANSPARENT(Color.Transparent, "Transparent"),
     RED(Color(0xFFF28B82), "Red"),
     ORANGE(Color(0xFFFBBC04), "Orange"), 
     YELLOW(Color(0xFFFFF475), "Yellow"),

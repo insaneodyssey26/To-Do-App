@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.masum.todo.domain.model.TodoTask
+import com.masum.todo.domain.model.TaskColor
 import com.masum.todo.ui.theme.TaskCardBackground
 import com.masum.todo.ui.theme.TaskCardBorder
 import com.masum.todo.ui.theme.CompletedTaskOverlay
@@ -64,10 +65,16 @@ fun TodoItemCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (task.isCompleted) 
-                task.color.color.copy(alpha = 0.3f)
-            else
-                task.color.color.copy(alpha = 0.7f)
+            containerColor = when {
+                task.color == TaskColor.TRANSPARENT -> {
+                    if (task.isCompleted) 
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    else 
+                        MaterialTheme.colorScheme.surface
+                }
+                task.isCompleted -> task.color.color.copy(alpha = 0.3f)
+                else -> task.color.color.copy(alpha = 0.7f)
+            }
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (task.isCompleted) 2.dp else 6.dp

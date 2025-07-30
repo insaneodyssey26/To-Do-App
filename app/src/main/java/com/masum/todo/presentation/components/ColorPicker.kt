@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -68,7 +69,13 @@ private fun ColorItem(
         modifier = modifier
             .size(40.dp)
             .clip(CircleShape)
-            .background(color.color)
+            .background(
+                if (color == TaskColor.TRANSPARENT) {
+                    MaterialTheme.colorScheme.surfaceVariant
+                } else {
+                    color.color
+                }
+            )
             .border(
                 width = 2.dp,
                 color = animatedBorderColor,
@@ -77,7 +84,14 @@ private fun ColorItem(
             .clickable { onColorSelected() },
         contentAlignment = Alignment.Center
     ) {
-        if (isSelected) {
+        if (color == TaskColor.TRANSPARENT) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "No Color",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+        } else if (isSelected) {
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = "Selected",

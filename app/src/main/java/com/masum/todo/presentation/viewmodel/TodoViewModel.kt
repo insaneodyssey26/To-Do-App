@@ -37,6 +37,7 @@ class TodoViewModel(
             is TodoUiEvent.UpdateCurrentTaskBody -> updateCurrentTaskBody(event.body)
             is TodoUiEvent.ClearSnackbarMessage -> clearSnackbarMessage()
             is TodoUiEvent.ShowError -> showError(event.message)
+            is TodoUiEvent.ToggleViewMode -> toggleViewMode()
         }
     }
     
@@ -206,6 +207,12 @@ class TodoViewModel(
         _uiState.value = _uiState.value.copy(
             error = message,
             snackbarMessage = message
+        )
+    }
+    
+    private fun toggleViewMode() {
+        _uiState.value = _uiState.value.copy(
+            isGridView = !_uiState.value.isGridView
         )
     }
 }

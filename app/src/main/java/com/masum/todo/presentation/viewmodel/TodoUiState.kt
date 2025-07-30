@@ -45,7 +45,9 @@ data class TodoUiState(
     val selectedSort: SortType = SortType.CREATED_DATE,
     val showSearchBar: Boolean = false,
     val showFilterOptions: Boolean = false,
-    val taskEditorDraft: com.masum.todo.domain.model.TodoTask? = null
+    val taskEditorDraft: com.masum.todo.domain.model.TodoTask? = null,
+    val recentlyDeletedTask: com.masum.todo.domain.model.TodoTask? = null,
+    val showUndoSnackbar: Boolean = false
 )
 
 sealed class TodoUiEvent {
@@ -61,6 +63,7 @@ sealed class TodoUiEvent {
     ) : TodoUiEvent()
     data class UpdateTask(val task: TodoTask) : TodoUiEvent()
     data class DeleteTask(val task: TodoTask) : TodoUiEvent()
+    data object UndoDeleteTask : TodoUiEvent()
     data class ToggleTaskCompletion(val task: TodoTask, val isCompleted: Boolean) : TodoUiEvent()
     data object ShowAddDialog : TodoUiEvent()
     data object HideAddDialog : TodoUiEvent()

@@ -160,11 +160,32 @@ class TodoViewModel(
         viewModelScope.launch {
             try {
                 repository.deleteTask(task)
+                _uiState.value = _uiState.value.copy(
+                    recentlyDeletedTask = task,
+                    showUndoSnackbar = true
+                )
                 showSnackbarMessage("Task deleted: ${task.heading}")
                 ErrorHandler.logError("Task deleted successfully: ${task.heading}")
             } catch (e: Exception) {
                 ErrorHandler.logError("Failed to delete task", e)
                 showError("Failed to delete task: ${ErrorHandler.getErrorMessage(e)}")
+            }
+        }
+    }
+
+    fun undoDeleteTask() {
+        val task = _uiState.value.recentlyDeletedTask ?: return
+        viewModelScope.launch {
+            try {
+                repository.insertTask(task)
+                _uiState.value = _uiState.value.copy(
+                    recentlyDeletedTask = null,
+                    showUndoSnackbar = false
+                )
+                showSnackbarMessage("Task restored: ${task.heading}")
+            } catch (e: Exception) {
+                ErrorHandler.logError("Failed to restore task", e)
+                showError("Failed to restore task: ${ErrorHandler.getErrorMessage(e)}")
             }
         }
     }

@@ -2,6 +2,7 @@ package com.masum.todo.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.masum.todo.domain.model.TaskColor
 import com.masum.todo.domain.model.TodoTask
 import com.masum.todo.domain.repository.TodoRepository
 import com.masum.todo.utils.ErrorHandler
@@ -35,6 +36,7 @@ class TodoViewModel(
             is TodoUiEvent.HideEditDialog -> hideEditDialog()
             is TodoUiEvent.UpdateCurrentTaskHeading -> updateCurrentTaskHeading(event.heading)
             is TodoUiEvent.UpdateCurrentTaskBody -> updateCurrentTaskBody(event.body)
+            is TodoUiEvent.UpdateCurrentTaskColor -> updateCurrentTaskColor(event.color)
             is TodoUiEvent.ClearSnackbarMessage -> clearSnackbarMessage()
             is TodoUiEvent.ShowError -> showError(event.message)
             is TodoUiEvent.ToggleViewMode -> toggleViewMode()
@@ -81,7 +83,8 @@ class TodoViewModel(
             try {
                 val newTask = TodoTask(
                     heading = heading.trim(),
-                    body = body.trim()
+                    body = body.trim(),
+                    color = _uiState.value.currentTaskColor
                 )
                 repository.insertTask(newTask)
                 hideAddDialog()
@@ -98,6 +101,7 @@ class TodoViewModel(
     private fun updateTask(task: TodoTask) {
         val heading = _uiState.value.currentTaskHeading
         val body = _uiState.value.currentTaskBody
+        val color = _uiState.value.currentTaskColor
         
         if (heading.isBlank()) {
             showError("Task heading cannot be empty")
@@ -108,7 +112,8 @@ class TodoViewModel(
             try {
                 val updatedTask = task.copy(
                     heading = heading.trim(),
-                    body = body.trim()
+                    body = body.trim(),
+                    color = color
                 )
                 repository.updateTask(updatedTask)
                 hideEditDialog()
@@ -154,7 +159,8 @@ class TodoViewModel(
         _uiState.value = _uiState.value.copy(
             showAddDialog = true,
             currentTaskHeading = "",
-            currentTaskBody = ""
+            currentTaskBody = "",
+            currentTaskColor = TaskColor.DEFAULT
         )
     }
     
@@ -168,7 +174,8 @@ class TodoViewModel(
             showEditDialog = true,
             taskToEdit = task,
             currentTaskHeading = task.heading,
-            currentTaskBody = task.body
+            currentTaskBody = task.body,
+            currentTaskColor = task.color
         )
     }
     
@@ -188,10 +195,15 @@ class TodoViewModel(
         _uiState.value = _uiState.value.copy(currentTaskBody = body)
     }
     
+    private fun updateCurrentTaskColor(color: TaskColor) {
+        _uiState.value = _uiState.value.copy(currentTaskColor = color)
+    }
+    
     private fun clearCurrentTask() {
         _uiState.value = _uiState.value.copy(
             currentTaskHeading = "",
-            currentTaskBody = ""
+            currentTaskBody = "",
+            currentTaskColor = TaskColor.DEFAULT
         )
     }
     

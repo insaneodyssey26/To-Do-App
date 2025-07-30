@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Task
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -20,14 +20,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.masum.todo.domain.model.TaskColor
 
 @Composable
 fun TaskDialog(
     dialogTitle: String,
     taskHeading: String,
     taskBody: String,
+    taskColor: TaskColor,
     onHeadingChange: (String) -> Unit,
     onBodyChange: (String) -> Unit,
+    onColorChange: (TaskColor) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     confirmButtonText: String,
@@ -53,7 +56,7 @@ fun TaskDialog(
                     label = { Text("Task heading") },
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.List,
+                            imageVector = Icons.Default.Task,
                             contentDescription = "Task heading",
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -76,7 +79,7 @@ fun TaskDialog(
                     label = { Text("Task description (optional)") },
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.Edit,
+                            imageVector = Icons.Default.Description,
                             contentDescription = "Task description",
                             tint = MaterialTheme.colorScheme.secondary
                         )
@@ -90,6 +93,22 @@ fun TaskDialog(
                         focusedLeadingIconColor = MaterialTheme.colorScheme.secondary
                     ),
                     shape = RoundedCornerShape(12.dp)
+                )
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                Text(
+                    text = "Choose Color",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                ColorPicker(
+                    selectedColor = taskColor,
+                    onColorSelected = onColorChange
                 )
             }
         },

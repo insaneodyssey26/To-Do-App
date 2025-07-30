@@ -8,10 +8,10 @@ import android.content.Context
 
 @Database(
     entities = [TodoTaskEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
-@TypeConverters(DateConverter::class)
+@TypeConverters(DateConverter::class, TaskColorConverter::class)
 abstract class TodoDatabase : RoomDatabase() {
     
     abstract fun todoTaskDao(): TodoTaskDao

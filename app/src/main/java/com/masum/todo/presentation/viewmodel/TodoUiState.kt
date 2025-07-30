@@ -1,5 +1,6 @@
 package com.masum.todo.presentation.viewmodel
 
+import com.masum.todo.domain.model.TaskColor
 import com.masum.todo.domain.model.TodoTask
 
 data class TodoUiState(
@@ -10,6 +11,7 @@ data class TodoUiState(
     val showEditDialog: Boolean = false,
     val currentTaskHeading: String = "",
     val currentTaskBody: String = "",
+    val currentTaskColor: TaskColor = TaskColor.DEFAULT,
     val taskToEdit: TodoTask? = null,
     val snackbarMessage: String? = null,
     val isGridView: Boolean = true
@@ -27,6 +29,7 @@ sealed class TodoUiEvent {
     data object HideEditDialog : TodoUiEvent()
     data class UpdateCurrentTaskHeading(val heading: String) : TodoUiEvent()
     data class UpdateCurrentTaskBody(val body: String) : TodoUiEvent()
+    data class UpdateCurrentTaskColor(val color: TaskColor) : TodoUiEvent()
     data object ClearSnackbarMessage : TodoUiEvent()
     data class ShowError(val message: String) : TodoUiEvent()
     data object ToggleViewMode : TodoUiEvent()

@@ -21,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
@@ -43,6 +44,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.draw.scale
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.masum.todo.presentation.components.EmptyState
 import com.masum.todo.presentation.components.TaskDialog
@@ -79,16 +84,18 @@ fun TodoScreen(
                     Column {
                         Text(
                             text = "My Tasks",
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Bold
+                            style = MaterialTheme.typography.displayMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
                         )
                         if (uiState.tasks.isNotEmpty()) {
                             val completedCount = uiState.tasks.count { it.isCompleted }
                             val totalCount = uiState.tasks.size
                             Text(
                                 text = "$completedCount of $totalCount completed",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
@@ -102,26 +109,37 @@ fun TodoScreen(
                     )
                 },
                 colors = TopAppBarDefaults.largeTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
                 ),
                 scrollBehavior = scrollBehavior
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(
+            val fabScale by animateFloatAsState(
+                targetValue = if (uiState.isLoading) 0.8f else 1f,
+                animationSpec = tween(300),
+                label = "fab_scale"
+            )
+            
+            ExtendedFloatingActionButton(
                 onClick = {
-                    viewModel.onEvent(TodoUiEvent.ShowAddDialog)
+                    viewModel.onEvent(TodoUiEvent.ShowTaskEditor)
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(64.dp)
+                modifier = Modifier.scale(fabScale)
             ) {
                 Icon(
                     Icons.Default.Add, 
-                    contentDescription = "Add Task",
-                    modifier = Modifier.size(28.dp)
+                    contentDescription = "Create Task",
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Create Task",
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -177,7 +195,7 @@ fun TodoScreen(
                                     viewModel.onEvent(TodoUiEvent.DeleteTask(task))
                                 },
                                 onEditTask = { task ->
-                                    viewModel.onEvent(TodoUiEvent.ShowEditDialog(task))
+                                    viewModel.onEvent(TodoUiEvent.ShowTaskEditorForEdit(task))
                                 }
                             )
                         } else {
@@ -190,7 +208,7 @@ fun TodoScreen(
                                     viewModel.onEvent(TodoUiEvent.DeleteTask(task))
                                 },
                                 onEditTask = { task ->
-                                    viewModel.onEvent(TodoUiEvent.ShowEditDialog(task))
+                                    viewModel.onEvent(TodoUiEvent.ShowTaskEditorForEdit(task))
                                 }
                             )
                         }
@@ -249,6 +267,29 @@ fun TodoScreen(
                 }
             },
             confirmButtonText = "Save"
+        )
+    }
+
+    
+    if (uiState.showTaskEditor) {
+        TaskEditorScreen(
+            taskId = uiState.taskToEdit?.id,
+            onNavigateBack = {
+                viewModel.onEvent(TodoUiEvent.HideTaskEditor)
+            },
+            onSaveTask = { heading, body, color, priority, dueDate, subtasks, tags ->
+                viewModel.onEvent(
+                    TodoUiEvent.AddAdvancedTask(
+                        heading = heading,
+                        body = body,
+                        color = color,
+                        priority = priority,
+                        dueDate = dueDate,
+                        subtasks = subtasks,
+                        tags = tags
+                    )
+                )
+            }
         )
     }
 }

@@ -16,7 +16,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -24,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -50,6 +53,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.ui.draw.scale
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.masum.todo.presentation.components.EmptyState
+import com.masum.todo.presentation.components.SearchAndFilterBar
 import com.masum.todo.presentation.components.TaskDialog
 import com.masum.todo.presentation.components.TodoGrid
 import com.masum.todo.presentation.components.TodoList
@@ -101,12 +105,40 @@ fun TodoScreen(
                     }
                 },
                 actions = {
-                    ViewToggleButton(
-                        isGridView = uiState.isGridView,
-                        onToggleView = {
-                            viewModel.onEvent(TodoUiEvent.ToggleViewMode)
+                    Row {
+                        IconButton(
+                            onClick = {
+                                viewModel.onEvent(TodoUiEvent.ToggleSearchBar)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = if (uiState.showSearchBar) MaterialTheme.colorScheme.primary
+                                       else MaterialTheme.colorScheme.onSurface
+                            )
                         }
-                    )
+                        
+                        IconButton(
+                            onClick = {
+                                viewModel.onEvent(TodoUiEvent.ToggleFilterOptions)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FilterList,
+                                contentDescription = "Filter",
+                                tint = if (uiState.showFilterOptions) MaterialTheme.colorScheme.primary
+                                       else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        
+                        ViewToggleButton(
+                            isGridView = uiState.isGridView,
+                            onToggleView = {
+                                viewModel.onEvent(TodoUiEvent.ToggleViewMode)
+                            }
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -161,10 +193,38 @@ fun TodoScreen(
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
+                val tasksToShow = if (uiState.searchQuery.isNotEmpty() ||
+                                    uiState.selectedFilter != com.masum.todo.presentation.viewmodel.FilterType.ALL) {
+                    uiState.filteredTasks
+                } else {
+                    uiState.tasks
+                }
+                SearchAndFilterBar(
+                    searchQuery = uiState.searchQuery,
+                    selectedFilter = uiState.selectedFilter,
+                    selectedSort = uiState.selectedSort,
+                    showSearchBar = uiState.showSearchBar,
+                    showFilterOptions = uiState.showFilterOptions,
+                    filteredTasksCount = tasksToShow.size,
+                    onSearchQueryChange = { query ->
+                        viewModel.onEvent(TodoUiEvent.UpdateSearchQuery(query))
+                    },
+                    onFilterChange = { filter ->
+                        viewModel.onEvent(TodoUiEvent.UpdateFilter(filter))
+                    },
+                    onSortChange = { sort ->
+                        viewModel.onEvent(TodoUiEvent.UpdateSort(sort))
+                    },
+                    onClearSearch = {
+                        viewModel.onEvent(TodoUiEvent.ClearSearch)
+                    }
+                )
+                
                 if (uiState.tasks.isNotEmpty()) {
                     TaskSummaryCard(
                         totalTasks = uiState.tasks.size,
                         completedTasks = uiState.tasks.count { it.isCompleted },
+                        filteredCount = if (tasksToShow != uiState.tasks) tasksToShow.size else null,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
@@ -184,10 +244,13 @@ fun TodoScreen(
                     uiState.tasks.isEmpty() -> {
                         EmptyState()
                     }
+                    tasksToShow.isEmpty() -> {
+                        EmptySearchState()
+                    }
                     else -> {
                         if (uiState.isGridView) {
                             TodoGrid(
-                                tasks = uiState.tasks,
+                                tasks = tasksToShow,
                                 onTaskChecked = { task, isChecked ->
                                     viewModel.onEvent(TodoUiEvent.ToggleTaskCompletion(task, isChecked))
                                 },
@@ -200,7 +263,7 @@ fun TodoScreen(
                             )
                         } else {
                             TodoList(
-                                tasks = uiState.tasks,
+                                tasks = tasksToShow,
                                 onTaskChecked = { task, isChecked ->
                                     viewModel.onEvent(TodoUiEvent.ToggleTaskCompletion(task, isChecked))
                                 },
@@ -295,9 +358,44 @@ fun TodoScreen(
 }
 
 @Composable
+private fun EmptySearchState(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "No tasks found",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Try adjusting your search or filters",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
 private fun TaskSummaryCard(
     totalTasks: Int,
     completedTasks: Int,
+    filteredCount: Int? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -329,12 +427,21 @@ private fun TaskSummaryCard(
                 color = Color(0xFF4CAF50)
             )
             
-            TaskStatItem(
-                icon = Icons.Default.List,
-                label = "Remaining",
-                count = totalTasks - completedTasks,
-                color = MaterialTheme.colorScheme.tertiary
-            )
+            if (filteredCount != null) {
+                TaskStatItem(
+                    icon = Icons.Default.FilterList,
+                    label = "Filtered",
+                    count = filteredCount,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            } else {
+                TaskStatItem(
+                    icon = Icons.Default.List,
+                    label = "Remaining",
+                    count = totalTasks - completedTasks,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
         }
     }
 }

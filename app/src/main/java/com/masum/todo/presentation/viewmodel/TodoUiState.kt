@@ -6,8 +6,30 @@ import com.masum.todo.domain.model.TodoTask
 import com.masum.todo.domain.model.Subtask
 import java.util.Date
 
+enum class FilterType {
+    ALL,
+    TODAY,
+    OVERDUE,
+    COMPLETED,
+    PENDING,
+    HIGH_PRIORITY,
+    MEDIUM_PRIORITY,
+    LOW_PRIORITY,
+    WITH_DUE_DATE,
+    NO_DUE_DATE
+}
+
+enum class SortType {
+    CREATED_DATE,
+    DUE_DATE,
+    PRIORITY,
+    ALPHABETICAL,
+    COMPLETION_STATUS
+}
+
 data class TodoUiState(
     val tasks: List<TodoTask> = emptyList(),
+    val filteredTasks: List<TodoTask> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
     val showAddDialog: Boolean = false,
@@ -18,7 +40,12 @@ data class TodoUiState(
     val currentTaskColor: TaskColor = TaskColor.DEFAULT,
     val taskToEdit: TodoTask? = null,
     val snackbarMessage: String? = null,
-    val isGridView: Boolean = true
+    val isGridView: Boolean = true,
+    val searchQuery: String = "",
+    val selectedFilter: FilterType = FilterType.ALL,
+    val selectedSort: SortType = SortType.CREATED_DATE,
+    val showSearchBar: Boolean = false,
+    val showFilterOptions: Boolean = false
 )
 
 sealed class TodoUiEvent {
@@ -49,4 +76,10 @@ sealed class TodoUiEvent {
     data object ClearSnackbarMessage : TodoUiEvent()
     data class ShowError(val message: String) : TodoUiEvent()
     data object ToggleViewMode : TodoUiEvent()
+    data class UpdateSearchQuery(val query: String) : TodoUiEvent()
+    data class UpdateFilter(val filter: FilterType) : TodoUiEvent()
+    data class UpdateSort(val sort: SortType) : TodoUiEvent()
+    data object ToggleSearchBar : TodoUiEvent()
+    data object ToggleFilterOptions : TodoUiEvent()
+    data object ClearSearch : TodoUiEvent()
 }

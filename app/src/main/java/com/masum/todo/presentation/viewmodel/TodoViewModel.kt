@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import java.util.Date
+import java.util.Calendar
 
 class TodoViewModel(
     private val repository: TodoRepository
@@ -50,6 +51,12 @@ class TodoViewModel(
             is TodoUiEvent.ClearSnackbarMessage -> clearSnackbarMessage()
             is TodoUiEvent.ShowError -> showError(event.message)
             is TodoUiEvent.ToggleViewMode -> toggleViewMode()
+            is TodoUiEvent.UpdateSearchQuery -> updateSearchQuery(event.query)
+            is TodoUiEvent.UpdateFilter -> updateFilter(event.filter)
+            is TodoUiEvent.UpdateSort -> updateSort(event.sort)
+            is TodoUiEvent.ToggleSearchBar -> toggleSearchBar()
+            is TodoUiEvent.ToggleFilterOptions -> toggleFilterOptions()
+            is TodoUiEvent.ClearSearch -> clearSearch()
         }
     }
     
@@ -72,6 +79,7 @@ class TodoViewModel(
                             isLoading = false,
                             error = null
                         )
+                        applyFiltersAndSort()
                     }
             } catch (e: Exception) {
                 ErrorHandler.logError("Unexpected error while loading tasks", e)
@@ -290,5 +298,99 @@ class TodoViewModel(
         _uiState.value = _uiState.value.copy(
             isGridView = !_uiState.value.isGridView
         )
+    }
+    
+    private fun updateSearchQuery(query: String) {
+        _uiState.value = _uiState.value.copy(searchQuery = query)
+        applyFiltersAndSort()
+    }
+    
+    private fun updateFilter(filter: FilterType) {
+        _uiState.value = _uiState.value.copy(selectedFilter = filter)
+        applyFiltersAndSort()
+    }
+    
+    private fun updateSort(sort: SortType) {
+        _uiState.value = _uiState.value.copy(selectedSort = sort)
+        applyFiltersAndSort()
+    }
+    
+    private fun toggleSearchBar() {
+        _uiState.value = _uiState.value.copy(
+            showSearchBar = !_uiState.value.showSearchBar,
+            showFilterOptions = false
+        )
+        if (!_uiState.value.showSearchBar) {
+            clearSearch()
+        }
+    }
+    
+    private fun toggleFilterOptions() {
+        _uiState.value = _uiState.value.copy(
+            showFilterOptions = !_uiState.value.showFilterOptions,
+            showSearchBar = false
+        )
+    }
+    
+    private fun clearSearch() {
+        _uiState.value = _uiState.value.copy(
+            searchQuery = "",
+            selectedFilter = FilterType.ALL,
+            showSearchBar = false,
+            showFilterOptions = false
+        )
+        applyFiltersAndSort()
+    }
+    
+    private fun applyFiltersAndSort() {
+        val tasks = _uiState.value.tasks
+        val searchQuery = _uiState.value.searchQuery.lowercase()
+        val filter = _uiState.value.selectedFilter
+        val sort = _uiState.value.selectedSort
+        
+        var filteredTasks = tasks
+        
+        if (searchQuery.isNotBlank()) {
+            filteredTasks = filteredTasks.filter { task ->
+                task.heading.lowercase().contains(searchQuery) ||
+                task.body.lowercase().contains(searchQuery) ||
+                task.tags.any { it.lowercase().contains(searchQuery) } ||
+                task.subtasks.any { it.title.lowercase().contains(searchQuery) }
+            }
+        }
+        
+        filteredTasks = when (filter) {
+            FilterType.ALL -> filteredTasks
+            FilterType.TODAY -> filteredTasks.filter { task ->
+                task.dueDate?.let { dueDate ->
+                    val today = Calendar.getInstance()
+                    val taskDate = Calendar.getInstance().apply { time = dueDate }
+                    today.get(Calendar.YEAR) == taskDate.get(Calendar.YEAR) &&
+                    today.get(Calendar.DAY_OF_YEAR) == taskDate.get(Calendar.DAY_OF_YEAR)
+                } ?: false
+            }
+            FilterType.OVERDUE -> filteredTasks.filter { task ->
+                task.dueDate?.let { dueDate ->
+                    !task.isCompleted && dueDate.before(Date())
+                } ?: false
+            }
+            FilterType.COMPLETED -> filteredTasks.filter { it.isCompleted }
+            FilterType.PENDING -> filteredTasks.filter { !it.isCompleted }
+            FilterType.HIGH_PRIORITY -> filteredTasks.filter { it.priority == TaskPriority.HIGH }
+            FilterType.MEDIUM_PRIORITY -> filteredTasks.filter { it.priority == TaskPriority.MEDIUM }
+            FilterType.LOW_PRIORITY -> filteredTasks.filter { it.priority == TaskPriority.LOW }
+            FilterType.WITH_DUE_DATE -> filteredTasks.filter { it.dueDate != null }
+            FilterType.NO_DUE_DATE -> filteredTasks.filter { it.dueDate == null }
+        }
+        
+        filteredTasks = when (sort) {
+            SortType.CREATED_DATE -> filteredTasks.sortedByDescending { it.createdAt }
+            SortType.DUE_DATE -> filteredTasks.sortedWith(compareBy<TodoTask> { it.dueDate == null }.thenBy { it.dueDate })
+            SortType.PRIORITY -> filteredTasks.sortedBy { it.priority.ordinal }
+            SortType.ALPHABETICAL -> filteredTasks.sortedBy { it.heading.lowercase() }
+            SortType.COMPLETION_STATUS -> filteredTasks.sortedBy { it.isCompleted }
+        }
+        
+        _uiState.value = _uiState.value.copy(filteredTasks = filteredTasks)
     }
 }

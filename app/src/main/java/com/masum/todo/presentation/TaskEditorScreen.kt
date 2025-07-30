@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -78,12 +79,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -113,7 +117,7 @@ fun TaskEditorScreen(
     modifier: Modifier = Modifier
 ) {
     var taskHeading by remember { mutableStateOf("") }
-    var taskBody by remember { mutableStateOf("") }
+    var taskBodyField by remember { mutableStateOf(TextFieldValue("")) }
     var selectedColor by remember { mutableStateOf(TaskColor.DEFAULT) }
     var selectedPriority by remember { mutableStateOf(TaskPriority.MEDIUM) }
     var dueDate by remember { mutableStateOf<Date?>(null) }
@@ -124,11 +128,92 @@ fun TaskEditorScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
     var showPrioritySelector by remember { mutableStateOf(false) }
-    var isBold by remember { mutableStateOf(false) }
-    var isItalic by remember { mutableStateOf(false) }
+    var isBoldActive by remember { mutableStateOf(false) }
+    var isItalicActive by remember { mutableStateOf(false) }
+    var isBulletActive by remember { mutableStateOf(false) }
+    var isNumberingActive by remember { mutableStateOf(false) }
     
     val keyboardController = LocalSoftwareKeyboardController.current
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+
+    fun toggleBold() {
+        val selection = taskBodyField.selection
+        if (selection.collapsed) {
+            isBoldActive = !isBoldActive
+            return
+        }
+        
+        val selectedText = taskBodyField.text.substring(selection.start, selection.end)
+        val newAnnotatedString = buildAnnotatedString {
+            append(taskBodyField.text.substring(0, selection.start))
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(selectedText)
+            }
+            append(taskBodyField.text.substring(selection.end))
+        }
+        taskBodyField = taskBodyField.copy(
+            annotatedString = newAnnotatedString,
+            selection = TextRange(selection.end)
+        )
+        isBoldActive = !isBoldActive
+    }
+
+    fun toggleItalic() {
+        val selection = taskBodyField.selection
+        if (selection.collapsed) {
+            isItalicActive = !isItalicActive
+            return
+        }
+        
+        val selectedText = taskBodyField.text.substring(selection.start, selection.end)
+        val newAnnotatedString = buildAnnotatedString {
+            append(taskBodyField.text.substring(0, selection.start))
+            withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
+                append(selectedText)
+            }
+            append(taskBodyField.text.substring(selection.end))
+        }
+        taskBodyField = taskBodyField.copy(
+            annotatedString = newAnnotatedString,
+            selection = TextRange(selection.end)
+        )
+        isItalicActive = !isItalicActive
+    }
+
+    fun toggleBullet() {
+        val cursor = taskBodyField.selection.start
+        val isAtStartOrNewLine = taskBodyField.text.isEmpty() || (cursor == 0) || (cursor > 0 && taskBodyField.text[cursor - 1] == '\n')
+        isBulletActive = !isBulletActive
+        if (isBulletActive) {
+            isNumberingActive = false
+            if (isAtStartOrNewLine) {
+                val prefix = "• "
+                val newText = StringBuilder(taskBodyField.text).insert(cursor, prefix).toString()
+                taskBodyField = taskBodyField.copy(
+                    text = newText,
+                    selection = TextRange(cursor + prefix.length)
+                )
+            }
+        }
+    }
+
+    fun toggleNumbering() {
+        val cursor = taskBodyField.selection.start
+        val isAtStartOrNewLine = taskBodyField.text.isEmpty() || (cursor == 0) || (cursor > 0 && taskBodyField.text[cursor - 1] == '\n')
+        isNumberingActive = !isNumberingActive
+        if (isNumberingActive) {
+            isBulletActive = false
+            if (isAtStartOrNewLine) {
+                val lines = taskBodyField.text.substring(0, cursor).split('\n')
+                val prefix = "${lines.size}. "
+                val newText = StringBuilder(taskBodyField.text).insert(cursor, prefix).toString()
+                taskBodyField = taskBodyField.copy(
+                    text = newText,
+                    selection = TextRange(cursor + prefix.length)
+                )
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -160,7 +245,7 @@ fun TaskEditorScreen(
                     if (taskHeading.isNotBlank()) {
                         onSaveTask(
                             taskHeading,
-                            taskBody,
+                            taskBodyField.text,
                             selectedColor,
                             selectedPriority,
                             dueDate,
@@ -228,23 +313,23 @@ fun TaskEditorScreen(
                 ) {
                     FormatButton(
                         icon = Icons.Default.FormatBold,
-                        isSelected = isBold,
-                        onClick = { isBold = !isBold }
+                        isSelected = isBoldActive,
+                        onClick = { toggleBold() }
                     )
                     FormatButton(
                         icon = Icons.Default.FormatItalic,
-                        isSelected = isItalic,
-                        onClick = { isItalic = !isItalic }
+                        isSelected = isItalicActive,
+                        onClick = { toggleItalic() }
                     )
                     FormatButton(
                         icon = Icons.Default.FormatListBulleted,
-                        isSelected = false,
-                        onClick = { }
+                        isSelected = isBulletActive,
+                        onClick = { toggleBullet() }
                     )
                     FormatButton(
                         icon = Icons.Default.FormatListNumbered,
-                        isSelected = false,
-                        onClick = { }
+                        isSelected = isNumberingActive,
+                        onClick = { toggleNumbering() }
                     )
                     FormatButton(
                         icon = Icons.Default.Image,
@@ -267,16 +352,80 @@ fun TaskEditorScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             
-            OutlinedTextField(
-                value = taskBody,
-                onValueChange = { taskBody = it },
-                label = { Text("Description") },
-                placeholder = { Text("Add details about your task...") },
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                shape = RoundedCornerShape(16.dp)
-            )
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    if (taskBodyField.text.isEmpty()) {
+                        Text(
+                            text = "Add details about your task...",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                    
+                    SelectionContainer {
+                        BasicTextField(
+                            value = taskBodyField,
+                            onValueChange = { newValue ->
+                                val currentStyle = SpanStyle(
+                                    fontWeight = if (isBoldActive) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (isItalicActive) FontStyle.Italic else FontStyle.Normal
+                                )
+                                val oldText = taskBodyField.text
+                                val diff = newValue.text.length - oldText.length
+                                val isNewLine = diff > 0 && newValue.text.getOrNull(newValue.selection.start - 1) == '\n'
+                                var updatedValue = newValue
+                                if (isNewLine && (isBulletActive || isNumberingActive)) {
+                                    val cursor = newValue.selection.start
+                                    val prefix = if (isBulletActive) {
+                                        "• "
+                                    } else {
+                                        val lines = newValue.text.substring(0, cursor).split('\n')
+                                        "${lines.size}. "
+                                    }
+                                    val newText = StringBuilder(newValue.text).insert(cursor, prefix).toString()
+                                    updatedValue = newValue.copy(
+                                        text = newText,
+                                        selection = TextRange(cursor + prefix.length)
+                                    )
+                                }
+                                if (updatedValue.text.length > taskBodyField.text.length) {
+                                    val insertedText = updatedValue.text.substring(taskBodyField.text.length)
+                                    val newAnnotatedString = buildAnnotatedString {
+                                        append(taskBodyField.annotatedString)
+                                        withStyle(style = currentStyle) {
+                                            append(insertedText)
+                                        }
+                                    }
+                                    taskBodyField = updatedValue.copy(annotatedString = newAnnotatedString)
+                                } else {
+                                    taskBodyField = updatedValue
+                                }
+                            },
+                            modifier = Modifier.fillMaxSize(),
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Text,
+                                imeAction = ImeAction.Default
+                            )
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 

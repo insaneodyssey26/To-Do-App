@@ -162,9 +162,9 @@ class TodoViewModel(
                 repository.deleteTask(task)
                 _uiState.value = _uiState.value.copy(
                     recentlyDeletedTask = task,
-                    showUndoSnackbar = true
+                    showUndoSnackbar = true,
+                    snackbarMessage = null
                 )
-                showSnackbarMessage("Task deleted: ${task.heading}")
                 ErrorHandler.logError("Task deleted successfully: ${task.heading}")
             } catch (e: Exception) {
                 ErrorHandler.logError("Failed to delete task", e)
@@ -180,9 +180,11 @@ class TodoViewModel(
                 repository.insertTask(task)
                 _uiState.value = _uiState.value.copy(
                     recentlyDeletedTask = null,
-                    showUndoSnackbar = false
+                    showUndoSnackbar = false,
+                    snackbarMessage = null
                 )
-                showSnackbarMessage("Task restored: ${task.heading}")
+                // Don't show another snackbar immediately after undo to avoid conflicts
+                ErrorHandler.logError("Task restored successfully: ${task.heading}")
             } catch (e: Exception) {
                 ErrorHandler.logError("Failed to restore task", e)
                 showError("Failed to restore task: ${ErrorHandler.getErrorMessage(e)}")
@@ -314,7 +316,11 @@ class TodoViewModel(
     }
     
     private fun clearSnackbarMessage() {
-        _uiState.value = _uiState.value.copy(snackbarMessage = null)
+        _uiState.value = _uiState.value.copy(
+            snackbarMessage = null,
+            showUndoSnackbar = false,
+            recentlyDeletedTask = null
+        )
     }
     
     private fun showError(message: String) {

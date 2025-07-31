@@ -183,7 +183,6 @@ class TodoViewModel(
                     showUndoSnackbar = false,
                     snackbarMessage = null
                 )
-                // Don't show another snackbar immediately after undo to avoid conflicts
                 ErrorHandler.logError("Task restored successfully: ${task.heading}")
             } catch (e: Exception) {
                 ErrorHandler.logError("Failed to restore task", e)

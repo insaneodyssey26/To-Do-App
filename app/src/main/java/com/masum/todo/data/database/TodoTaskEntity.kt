@@ -12,7 +12,7 @@ import java.util.Date
 @TypeConverters(DateConverter::class, TaskColorConverter::class)
 data class TodoTaskEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Long = 0,
     val heading: String,
     val body: String = "",
     val isCompleted: Boolean = false,
@@ -24,7 +24,7 @@ data class TodoTaskEntity(
 
 fun TodoTaskEntity.toDomainModel(): TodoTask {
     return TodoTask(
-        id = id,
+        id = id.toLong(),
         heading = heading,
         body = body,
         isCompleted = isCompleted,

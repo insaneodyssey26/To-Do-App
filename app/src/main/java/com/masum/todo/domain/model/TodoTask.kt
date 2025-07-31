@@ -3,7 +3,7 @@ package com.masum.todo.domain.model
 import java.util.Date
 
 data class TodoTask(
-    val id: Int = 0,
+    val id: Long = 0,
     val heading: String,
     val body: String = "",
     val richTextBody: String = "",

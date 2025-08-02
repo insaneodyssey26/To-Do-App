@@ -3,15 +3,6 @@
   <component name="CopilotDiffPersistence">
     <option name="pendingDiffs">
       <map>
-        <entry key="$PROJECT_DIR$/README.md">
-          <value>
-            <PendingDiffInfo>
-              <option name="filePath" value="$PROJECT_DIR$/README.md" />
-              <option name="originalContent" value="&#10;&#10;&#10;&#10;&#10;" />
-              <option name="updatedContent" value="# To-Do App&#10;&#10;Welcome! This is a simple and effective To-Do App designed to help you organize your daily tasks and boost your productivity. (Or at least, help you remember what you forgot!)&#10;&#10;## Features&#10;&#10;- Add, edit, and delete tasks with ease&#10;- Search and filter your tasks to find what you need quickly&#10;- Clean and user-friendly interface&#10;- Reliable performance and up-to-date dependencies&#10;&#10;## Changelog (v2.0)&#10;&#10;- ✨ **Major Design &amp; UI/UX Improvements**: The app looks and feels way better than version 1.0! Buttons are friendlier, screens are cleaner, and everything is easier on the eyes. (We gave the app a glow-up!)&#10;-  Fixed app crashes when editing tasks (no more surprise app disappearances!)&#10;-  Cleaned up code by removing unnecessary comments&#10;- ️ Updated Gradle plugins and dependencies (because who doesn't love fresh updates?)&#10;-  Increased minSdkVersion to 23 for better compatibility (sorry, ancient devices)&#10;- ️ Added a search and filter bar for easier task management (find your tasks faster than you lose your keys)&#10;&#10;## Getting Started&#10;&#10;1. Clone this repository to your local machine&#10;2. Open the project in Android Studio&#10;3. Ensure your `build.gradle.kts` files have the correct plugin versions&#10;4. Set `minSdkVersion` to 23 or higher in `app/build.gradle.kts`&#10;5. Build and run the app on your device or emulator&#10;&#10;## Tips&#10;&#10;- If you encounter plugin errors, check your Gradle files and add the required version numbers (Gradle is picky, but we still love it)&#10;- Keep your dependencies up to date for the best experience (and fewer headaches)&#10;&#10;Enjoy staying organized! (Or at least, enjoy trying!)" />
-            </PendingDiffInfo>
-          </value>
-        </entry>
         <entry key="$PROJECT_DIR$/app/build.gradle.kts">
           <value>
             <PendingDiffInfo>

@@ -31,7 +31,7 @@ fun LoginScreen(
 ) {
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
-    
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -60,93 +60,98 @@ fun LoginScreen(
             }
         }
     }
-    
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+
+    Surface(
+        color = MaterialTheme.colorScheme.background,
+        modifier = modifier.fillMaxSize()
     ) {
-        Text(
-            text = "Welcome to",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-        )
-        
-        Text(
-            text = "Todo App",
-            style = MaterialTheme.typography.displayMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Text(
-            text = "Sign in to sync your tasks across devices and never lose your important notes.",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
-        )
-        
-        Spacer(modifier = Modifier.height(48.dp))
-        
-        Button(
-            onClick = {
-                if (!isLoading) {
-                    val signInIntent = authService.getGoogleSignInClient().signInIntent
-                    launcher.launch(signInIntent)
-                }
-            },
-            enabled = !isLoading,
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            ),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(24.dp)
-                )
-            } else {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Continue with Google",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        TextButton(
-            onClick = onLoginSuccess,
-            modifier = Modifier.fillMaxWidth()
+                .fillMaxSize()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Continue without account",
-                style = MaterialTheme.typography.bodyLarge,
+                text = "Welcome to",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            )
+
+            Text(
+                text = "Todo App",
+                style = MaterialTheme.typography.displayMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Sign in to sync your tasks across devices and never lose your important notes.",
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+            )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            Button(
+                onClick = {
+                    if (!isLoading) {
+                        val signInIntent = authService.getGoogleSignInClient().signInIntent
+                        launcher.launch(signInIntent)
+                    }
+                },
+                enabled = !isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Continue with Google",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            TextButton(
+                onClick = onLoginSuccess,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Continue without account",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Note: Without an account, your tasks will only be stored locally on this device.",
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            )
         }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Text(
-            text = "Note: Without an account, your tasks will only be stored locally on this device.",
-            style = MaterialTheme.typography.bodySmall,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-        )
     }
 }

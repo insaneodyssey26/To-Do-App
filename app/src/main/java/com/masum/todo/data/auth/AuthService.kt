@@ -18,7 +18,7 @@ class AuthService(private val context: Context) {
     
     init {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("")
+            .requestIdToken("624447237215-e1muuisscc1kpi7jj2mjsn44m87pkoeg.apps.googleusercontent.com")
             .requestEmail()
             .build()
         
